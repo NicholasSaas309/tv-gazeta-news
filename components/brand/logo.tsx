@@ -20,7 +20,7 @@ export function Logo({
     <Link
       href="/"
       aria-label={`${settings.name} — página inicial`}
-      className={`inline-flex items-center ${className}`}
+      className={`inline-flex items-center dark:rounded-md dark:bg-white dark:px-2 dark:py-1 ${className}`}
     >
       <Image
         src={settings.logoUrl}

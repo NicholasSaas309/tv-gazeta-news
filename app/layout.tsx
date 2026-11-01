@@ -58,6 +58,13 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR" className={`${inter.variable} ${oswald.variable}`}>
       <head>
+        {/* Define o tema antes da pintura (evita flash). Usa escolha salva ou a do sistema. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();",
+          }}
+        />
         {/* Tema injetado em runtime: trocar cores nos settings reflete sem rebuild. */}
         <style dangerouslySetInnerHTML={{ __html: themeCss(settings) }} />
       </head>
