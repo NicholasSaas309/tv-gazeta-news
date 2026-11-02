@@ -1,45 +1,29 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Section, SectionHeading } from "@/components/public/section";
-import { NewsCard } from "@/components/public/news-card";
-import { ProgramCard } from "@/components/public/program-card";
-import { VideoCard } from "@/components/public/video-card";
-import { ScheduleDay } from "@/components/public/schedule-table";
-import { SponsorStrip } from "@/components/public/sponsors";
 import { LivePlayer } from "@/components/player/live-player";
 import { LiveBadge } from "@/components/public/live-badge";
 import { NewsTicker } from "@/components/public/ticker";
 import { Reveal } from "@/components/public/reveal";
-import { Thumb } from "@/components/public/thumb";
+import { StateNewsTabs } from "@/components/news/state-news-tabs";
+import { RecentVideos } from "@/components/videos/recent-videos";
 import { getSiteSettings } from "@/lib/settings";
-import { todayWeekday } from "@/lib/content/calendar";
-import {
-  getFeaturedNews,
-  getNews,
-  getPrograms,
-  getScheduleByDay,
-  getSponsors,
-  getVideos,
-} from "@/lib/content/sample";
+import { getAllStateFeeds, mergeRecent } from "@/lib/news";
+import { fetchChannelVideos } from "@/lib/videos/youtube";
 
 export default async function HomePage() {
   const settings = await getSiteSettings();
-  const featured = getFeaturedNews();
-  const latest = getNews()
-    .filter((n) => n.slug !== featured.slug)
-    .slice(0, 4);
-  const today = todayWeekday();
-  const todaySchedule = getScheduleByDay(today);
-  const programs = getPrograms().slice(0, 3);
-  const videos = getVideos().slice(0, 4);
-  const sponsors = getSponsors();
+  const feeds = await getAllStateFeeds(12);
+  const recent = mergeRecent(feeds, 10);
+  const highlights = recent.slice(0, 5);
+  const videos = await fetchChannelVideos(settings.youtubeChannelId, 4);
 
   return (
     <>
       {/* Ticker de plantão */}
-      <NewsTicker items={getNews()} />
+      <NewsTicker items={recent} />
 
-      {/* Hero "cinema" */}
+      {/* Hero "cinema": live + destaques */}
       <section className="relative overflow-hidden bg-brand-secondary text-white">
         <div
           className="pointer-events-none absolute -left-32 top-1/2 h-[28rem] w-[28rem] -translate-y-1/2 rounded-full opacity-25 blur-3xl animate-float"
@@ -69,88 +53,65 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Destaque */}
+            {/* Destaques (manchetes reais) */}
             <div className="flex flex-col animate-fade-up">
               <h2 className="font-display text-sm font-bold uppercase tracking-widest text-white/60">
-                Manchete
+                Últimas manchetes
               </h2>
-              <Link
-                href={`/noticias/${featured.slug}`}
-                className="group relative mt-3 flex-1 overflow-hidden rounded-xl ring-1 ring-white/10"
-              >
-                <Thumb seed={featured.slug} aspect="square" className="h-full min-h-[14rem]" />
-                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5">
-                  <span className="w-fit rounded bg-brand-accent px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide">
-                    {featured.category}
-                  </span>
-                  <h3 className="mt-2 font-display text-xl font-bold leading-tight group-hover:underline">
-                    {featured.title}
-                  </h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-white/70">{featured.excerpt}</p>
-                </div>
-              </Link>
+              <ul className="mt-3 flex-1 divide-y divide-white/10 overflow-hidden rounded-xl bg-white/5 ring-1 ring-white/10">
+                {highlights.length > 0 ? (
+                  highlights.map((item, i) => (
+                    <li key={`${item.link}-${i}`}>
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group block p-4 transition-colors hover:bg-white/5"
+                      >
+                        <span className="line-clamp-2 text-sm font-semibold leading-snug text-white group-hover:underline">
+                          {item.title}
+                        </span>
+                        <span className="mt-1 block text-xs text-white/50">
+                          {item.source}
+                          {item.publishedLabel ? ` · ${item.publishedLabel}` : ""}
+                        </span>
+                      </a>
+                    </li>
+                  ))
+                ) : (
+                  <li className="p-4 text-sm text-white/60">
+                    Carregando manchetes…
+                  </li>
+                )}
+              </ul>
             </div>
           </div>
         </Container>
       </section>
 
       <Container>
-        {/* Últimas notícias */}
+        {/* Vídeos recentes do canal (lives gravadas / cortes) */}
         <Section>
           <Reveal>
-            <SectionHeading title="Últimas notícias" href="/noticias" />
-            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {latest.map((item) => (
-                <NewsCard key={item.slug} item={item} />
-              ))}
-            </div>
-          </Reveal>
-        </Section>
-
-        {/* Programação de hoje */}
-        <Section className="border-t border-line">
-          <Reveal>
-            <SectionHeading
-              title={`Na programação de hoje (${today})`}
-              href="/programacao"
-              linkLabel="Ver grade"
-            />
-            <div className="mt-6">
-              <ScheduleDay entries={todaySchedule} />
-            </div>
-          </Reveal>
-        </Section>
-
-        {/* Programas */}
-        <Section className="border-t border-line">
-          <Reveal>
-            <SectionHeading title="Nossos programas" href="/programas" />
-            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {programs.map((p) => (
-                <ProgramCard key={p.slug} program={p} />
-              ))}
-            </div>
-          </Reveal>
-        </Section>
-
-        {/* Vídeos */}
-        <Section className="border-t border-line">
-          <Reveal>
             <SectionHeading title="Vídeos recentes" href="/videos" />
-            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {videos.map((v) => (
-                <VideoCard key={v.slug} video={v} />
-              ))}
+            <div className="mt-6">
+              <RecentVideos
+                videos={videos}
+                channelConfigured={Boolean(settings.youtubeChannelId)}
+              />
             </div>
           </Reveal>
         </Section>
 
-        {/* Patrocinadores */}
+        {/* Notícias por estado */}
         <Section className="border-t border-line">
           <Reveal>
-            <SectionHeading title="Patrocinadores" href="/patrocinadores" />
+            <SectionHeading title="Notícias por estado" href="/noticias" linkLabel="Ver todas" />
+            <p className="mt-2 text-sm text-content-muted">
+              Manchetes locais atualizadas automaticamente. Toque para ler no veículo de origem.
+            </p>
             <div className="mt-6">
-              <SponsorStrip sponsors={sponsors.slice(0, 8)} />
+              <StateNewsTabs feeds={feeds} limit={8} />
             </div>
           </Reveal>
         </Section>

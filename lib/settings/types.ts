@@ -54,6 +54,12 @@ export const siteSettingsSchema = z.object({
   socialLinks: z.array(socialLinkSchema).default([]),
   /** Configuração da fonte de transmissão ao vivo (player — Fase 4). */
   liveSource: liveSourceSchema,
+  /**
+   * ID do canal do YouTube da TV (ex.: "UCxxxx"). Usado para listar
+   * automaticamente os vídeos recentes/lives gravadas abaixo da transmissão.
+   * Vazio = seção de vídeos fica em modo "aguardando".
+   */
+  youtubeChannelId: z.string().default(""),
 });
 
 export type SocialLink = z.infer<typeof socialLinkSchema>;

@@ -1,22 +1,22 @@
 import { Container } from "@/components/ui/container";
 import { PageHeader } from "@/components/public/page-header";
-import { NewsFilter } from "@/components/public/news-filter";
-import { getFeaturedNews, getNews } from "@/lib/content/sample";
+import { StateNewsTabs } from "@/components/news/state-news-tabs";
+import { getAllStateFeeds } from "@/lib/news";
 
 export const metadata = { title: "Notícias" };
 
-export default function NoticiasPage() {
-  const featured = getFeaturedNews();
+export default async function NoticiasPage() {
+  const feeds = await getAllStateFeeds(15);
 
   return (
     <>
       <PageHeader
         eyebrow="Jornalismo"
         title="Notícias"
-        subtitle="As últimas notícias da TV Gazeta News — informação sem fronteiras."
+        subtitle="Manchetes locais dos estados que cobrimos, atualizadas automaticamente. Toque para ler a matéria completa no veículo de origem."
       />
       <Container className="py-10">
-        <NewsFilter items={getNews()} featured={featured} />
+        <StateNewsTabs feeds={feeds} />
       </Container>
     </>
   );

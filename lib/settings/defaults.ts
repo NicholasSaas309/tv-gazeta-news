@@ -28,4 +28,6 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     url: "",
     isLive: false,
   },
+  // Defina com o ID do canal do YouTube da TV para listar vídeos recentes.
+  youtubeChannelId: "",
 };
