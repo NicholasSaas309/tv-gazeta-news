@@ -1,6 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
 import { relativeTime } from "./time";
-import type { NewsSource } from "./sources";
 import type { NewsFeedItem } from "./types";
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
@@ -19,6 +18,15 @@ function textOf(value: unknown): string {
     return String((value as { "#text": unknown })["#text"] ?? "");
   }
   return "";
+}
+
+/** Extrai a URL do veículo do elemento <source url="...">. */
+function sourceUrlOf(value: unknown): string | null {
+  if (value && typeof value === "object" && "@_url" in value) {
+    const url = (value as { "@_url": unknown })["@_url"];
+    return url ? String(url) : null;
+  }
+  return null;
 }
 
 /** Remove o sufixo " - Veículo" que o Google Notícias costuma anexar ao título. */
@@ -41,8 +49,8 @@ function buildUrl(query: string): string {
  * Nunca lança: em caso de falha de rede/parse, retorna lista vazia (mantém o
  * build e a página saudáveis mesmo offline).
  */
-export async function fetchStateNews(
-  source: NewsSource,
+export async function fetchGoogleNews(
+  source: { query: string },
   limit = 12,
 ): Promise<NewsFeedItem[]> {
   try {
@@ -66,8 +74,10 @@ export async function fetchStateNews(
         title: cleanTitle(rawTitle, sourceName),
         link: textOf(item.link) || String(item.link ?? ""),
         source: sourceName,
+        sourceUrl: sourceUrlOf(item.source),
         publishedAt,
         publishedLabel: relativeTime(publishedAt),
+        image: null,
       };
     });
   } catch {

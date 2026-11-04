@@ -6,16 +6,23 @@ import { LiveBadge } from "@/components/public/live-badge";
 import { NewsTicker } from "@/components/public/ticker";
 import { Reveal } from "@/components/public/reveal";
 import { StateNewsTabs } from "@/components/news/state-news-tabs";
+import { NewsImageCard } from "@/components/news/news-image-card";
 import { RecentVideos } from "@/components/videos/recent-videos";
 import { getSiteSettings } from "@/lib/settings";
-import { getAllStateFeeds, mergeRecent } from "@/lib/news";
+import { getAllStateFeeds, mergeRecent, faviconFor } from "@/lib/news";
 import { fetchChannelVideos } from "@/lib/videos/youtube";
 
 export default async function HomePage() {
   const settings = await getSiteSettings();
   const feeds = await getAllStateFeeds(12);
-  const recent = mergeRecent(feeds, 10);
+  const recent = mergeRecent(feeds, 14);
   const highlights = recent.slice(0, 5);
+  // Destaques: priorizam itens com imagem de capa (feeds do G1), mantendo a ordem por data.
+  const withImage = recent.filter((i) => i.image);
+  const featured = (withImage.length >= 6
+    ? withImage
+    : [...withImage, ...recent.filter((i) => !i.image)]
+  ).slice(0, 6);
   const videos = await fetchChannelVideos(settings.youtubeChannelId, 4);
 
   return (
@@ -71,7 +78,17 @@ export default async function HomePage() {
                         <span className="line-clamp-2 text-sm font-semibold leading-snug text-white group-hover:underline">
                           {item.title}
                         </span>
-                        <span className="mt-1 block text-xs text-white/50">
+                        <span className="mt-1 flex items-center gap-1.5 text-xs text-white/50">
+                          {faviconFor(item.sourceUrl) ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={faviconFor(item.sourceUrl) as string}
+                              alt=""
+                              width={14}
+                              height={14}
+                              className="h-3.5 w-3.5 rounded-sm"
+                            />
+                          ) : null}
                           {item.source}
                           {item.publishedLabel ? ` · ${item.publishedLabel}` : ""}
                         </span>
@@ -90,8 +107,20 @@ export default async function HomePage() {
       </section>
 
       <Container>
-        {/* Vídeos recentes do canal (lives gravadas / cortes) */}
+        {/* Destaques com imagem */}
         <Section>
+          <Reveal>
+            <SectionHeading title="Destaques" href="/noticias" linkLabel="Ver todas" />
+            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.map((item, i) => (
+                <NewsImageCard key={`${item.link}-${i}`} item={item} />
+              ))}
+            </div>
+          </Reveal>
+        </Section>
+
+        {/* Vídeos recentes do canal (lives gravadas / cortes) */}
+        <Section className="border-t border-line">
           <Reveal>
             <SectionHeading title="Vídeos recentes" href="/videos" />
             <div className="mt-6">

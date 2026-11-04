@@ -1,26 +1,24 @@
 /**
- * Fontes de notícia por estado/cidade. Cada fonte vira uma aba no site e uma
- * busca no Google Notícias (RSS). A `query` é o termo pesquisado.
+ * Fontes de notícia por estado/cidade.
  *
- * Centralizar aqui facilita adicionar/remover locais depois (ou migrar para o
- * painel admin numa fase futura).
+ * - kind "g1": feed RSS regional do G1 (traz imagem real de capa no feed).
+ * - kind "google": busca no Google Notícias (texto + logo da fonte), usada
+ *   onde não há feed regional dedicado (ex.: cidade de Arapongas).
+ *
+ * Centralizar aqui facilita adicionar/remover locais depois.
  */
-export type NewsSource = {
-  slug: string;
-  /** Rótulo exibido na aba. */
-  label: string;
-  /** Termo de busca no Google Notícias. */
-  query: string;
-};
+export type NewsSource =
+  | { slug: string; label: string; kind: "g1"; feedUrl: string }
+  | { slug: string; label: string; kind: "google"; query: string };
 
 export const NEWS_SOURCES: NewsSource[] = [
-  { slug: "ceara", label: "Ceará", query: "Ceará" },
-  { slug: "parana", label: "Paraná", query: "Paraná" },
-  { slug: "arapongas", label: "Arapongas", query: "Arapongas Paraná" },
-  { slug: "sergipe", label: "Sergipe", query: "Sergipe" },
-  { slug: "minas-gerais", label: "Minas Gerais", query: "Minas Gerais" },
-  { slug: "rio-de-janeiro", label: "Rio de Janeiro", query: "Rio de Janeiro" },
-  { slug: "piaui", label: "Piauí", query: "Piauí" },
+  { slug: "ceara", label: "Ceará", kind: "g1", feedUrl: "https://g1.globo.com/rss/g1/ceara/" },
+  { slug: "parana", label: "Paraná", kind: "g1", feedUrl: "https://g1.globo.com/rss/g1/pr/parana/" },
+  { slug: "arapongas", label: "Arapongas", kind: "google", query: "Arapongas Paraná" },
+  { slug: "sergipe", label: "Sergipe", kind: "g1", feedUrl: "https://g1.globo.com/rss/g1/se/sergipe/" },
+  { slug: "minas-gerais", label: "Minas Gerais", kind: "g1", feedUrl: "https://g1.globo.com/rss/g1/minas-gerais/" },
+  { slug: "rio-de-janeiro", label: "Rio de Janeiro", kind: "g1", feedUrl: "https://g1.globo.com/rss/g1/rio-de-janeiro/" },
+  { slug: "piaui", label: "Piauí", kind: "g1", feedUrl: "https://g1.globo.com/rss/g1/pi/piaui/" },
 ];
 
 export function getNewsSource(slug: string): NewsSource | undefined {

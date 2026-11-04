@@ -1,9 +1,18 @@
-import { fetchStateNews } from "./google-news";
-import { NEWS_SOURCES, getNewsSource } from "./sources";
+import { fetchGoogleNews } from "./google-news";
+import { fetchG1News } from "./g1";
+import { NEWS_SOURCES, getNewsSource, type NewsSource } from "./sources";
 import type { NewsFeedItem, StateFeed } from "./types";
 
 export type { NewsFeedItem, StateFeed } from "./types";
 export { NEWS_SOURCES } from "./sources";
+export { faviconFor } from "./og-image";
+
+/** Busca as notícias de uma fonte, escolhendo o leitor conforme o tipo. */
+function fetchSource(source: NewsSource, limit: number): Promise<NewsFeedItem[]> {
+  return source.kind === "g1"
+    ? fetchG1News(source, limit)
+    : fetchGoogleNews(source, limit);
+}
 
 /** Busca as manchetes de todos os estados/cidades em paralelo. */
 export async function getAllStateFeeds(limit = 12): Promise<StateFeed[]> {
@@ -11,7 +20,7 @@ export async function getAllStateFeeds(limit = 12): Promise<StateFeed[]> {
     NEWS_SOURCES.map(async (source): Promise<StateFeed> => ({
       slug: source.slug,
       label: source.label,
-      items: await fetchStateNews(source, limit),
+      items: await fetchSource(source, limit),
     })),
   );
   return feeds;
@@ -24,7 +33,7 @@ export async function getStateFeed(
 ): Promise<StateFeed | null> {
   const source = getNewsSource(slug);
   if (!source) return null;
-  return { slug: source.slug, label: source.label, items: await fetchStateNews(source, limit) };
+  return { slug: source.slug, label: source.label, items: await fetchSource(source, limit) };
 }
 
 /** Lista única com as mais recentes de todas as fontes (ordenada por data). */

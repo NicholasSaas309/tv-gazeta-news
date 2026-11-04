@@ -1,3 +1,4 @@
+import { faviconFor } from "@/lib/news";
 import type { NewsFeedItem } from "@/lib/news";
 
 /**
@@ -17,7 +18,9 @@ export function NewsList({ items }: { items: NewsFeedItem[] }) {
 
   return (
     <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
-      {items.map((item, i) => (
+      {items.map((item, i) => {
+        const favicon = faviconFor(item.sourceUrl);
+        return (
         <li key={`${item.link}-${i}`}>
           <a
             href={item.link}
@@ -25,10 +28,21 @@ export function NewsList({ items }: { items: NewsFeedItem[] }) {
             rel="noopener noreferrer"
             className="group flex items-start gap-3 p-4 transition-colors hover:bg-surface-muted"
           >
-            <span
-              className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-accent"
-              aria-hidden="true"
-            />
+            {favicon ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={favicon}
+                alt=""
+                width={20}
+                height={20}
+                className="mt-0.5 h-5 w-5 shrink-0 rounded"
+              />
+            ) : (
+              <span
+                className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-accent"
+                aria-hidden="true"
+              />
+            )}
             <span className="min-w-0 flex-1">
               <span className="block font-semibold leading-snug text-content group-hover:text-brand">
                 {item.title}
@@ -55,7 +69,8 @@ export function NewsList({ items }: { items: NewsFeedItem[] }) {
             </svg>
           </a>
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }
