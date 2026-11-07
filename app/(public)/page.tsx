@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Section, SectionHeading } from "@/components/public/section";
 import { LivePlayer } from "@/components/player/live-player";
-import { LiveBadge } from "@/components/public/live-badge";
 import { NewsTicker } from "@/components/public/ticker";
 import { Reveal } from "@/components/public/reveal";
 import { StateNewsTabs } from "@/components/news/state-news-tabs";
@@ -52,8 +51,12 @@ export default async function HomePage() {
             {/* Player */}
             <div className="animate-fade-up">
               <div className="mb-3 flex items-center gap-3">
-                <LiveBadge href="/ao-vivo" />
-                <span className="text-sm text-white/70">Transmissão ao vivo</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-white/60">
+                  Transmissão ao vivo
+                </span>
+                <Link href="/ao-vivo" className="text-sm text-brand-accent hover:underline">
+                  Abrir página →
+                </Link>
               </div>
               <div className="overflow-hidden rounded-xl ring-1 ring-white/10">
                 <LivePlayer source={settings.liveSource} />

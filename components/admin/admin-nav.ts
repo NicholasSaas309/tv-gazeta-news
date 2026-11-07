@@ -14,6 +14,7 @@ export type AdminNavItem = {
 
 export const ADMIN_NAV: AdminNavItem[] = [
   { label: "Painel", href: "/admin", capability: "author_content", ready: true },
+  { label: "Transmissão", href: "/admin/transmissao", capability: "manage_settings", ready: true },
   { label: "Notícias", href: "/admin/noticias", capability: "manage_content", ready: false },
   { label: "Programação", href: "/admin/programacao", capability: "manage_content", ready: false },
   { label: "Programas", href: "/admin/programas", capability: "manage_content", ready: false },

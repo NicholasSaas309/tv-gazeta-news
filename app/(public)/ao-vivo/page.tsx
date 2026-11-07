@@ -8,11 +8,13 @@ import { getScheduleByDay } from "@/lib/content/sample";
 
 export const metadata = { title: "Ao Vivo" };
 
+// Dinâmica: reflete a troca da transmissão (config no /admin) na hora.
+export const dynamic = "force-dynamic";
+
 export default async function AoVivoPage() {
   const settings = await getSiteSettings();
   const today = todayWeekday();
   const schedule = getScheduleByDay(today);
-  const onAir = schedule.find((e) => e.live);
 
   return (
     <>
@@ -25,15 +27,11 @@ export default async function AoVivoPage() {
         <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
           <div>
             <LivePlayer source={settings.liveSource} />
-            <div className="mt-4 flex items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full bg-brand-accent/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-accent">
-                <span className="h-2 w-2 rounded-full bg-brand-accent" aria-hidden="true" />
-                No ar agora
-              </span>
-              <span className="text-sm text-content-muted">
-                {onAir ? onAir.title : "Programação gravada"}
-              </span>
-            </div>
+            <p className="mt-4 text-sm text-content-muted">
+              O selo <strong className="text-content">AO VIVO</strong> aparece
+              automaticamente quando a transmissão está no ar. Fora desses
+              horários, exibimos a grade de programação.
+            </p>
           </div>
 
           <aside>

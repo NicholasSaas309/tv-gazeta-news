@@ -1,7 +1,7 @@
 import { Container } from "@/components/ui/container";
 import { Logo } from "@/components/brand/logo";
-import { LiveBadge } from "@/components/public/live-badge";
 import { LiveClock } from "./live-clock";
+import { LiveIndicator } from "./live-indicator";
 import { NavLinks } from "./nav-links";
 import { ThemeToggle } from "./theme-toggle";
 import type { SiteSettings } from "@/lib/settings";
@@ -27,7 +27,7 @@ export function Header({ settings }: { settings: SiteSettings }) {
               </a>
             ))}
             <ThemeToggle />
-            <LiveBadge href="/ao-vivo" />
+            <LiveIndicator />
           </div>
         </Container>
       </div>
