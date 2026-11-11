@@ -108,14 +108,15 @@ async function main() {
     console.log(`• Usuário já existe: ${email}`);
   }
 
-  // Garante o perfil e promove a admin (service_role ignora RLS/trigger).
-  const { error: upsertError } = await supabase
+  // Promove a admin. O gatilho `prevent_role_escalation` só age em UPDATE e
+  // checa auth.uid() (nulo via service_role), então um upsert/update seria
+  // bloqueado. Removemos o perfil criado pelo trigger e inserimos como admin
+  // (INSERT não dispara aquele gatilho; service_role ignora a RLS).
+  await supabase.from("profiles").delete().eq("user_id", user.id);
+  const { error: insertError } = await supabase
     .from("profiles")
-    .upsert(
-      { user_id: user.id, role: "admin", display_name: email.split("@")[0] },
-      { onConflict: "user_id" },
-    );
-  if (upsertError) fail(`Erro ao promover a admin: ${upsertError.message}`);
+    .insert({ user_id: user.id, role: "admin", display_name: email.split("@")[0] });
+  if (insertError) fail(`Erro ao promover a admin: ${insertError.message}`);
 
   console.log(`✓ ${email} agora é ADMINISTRADOR.`);
   console.log("\nPronto. Faça login em /admin/login.\n");
