@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { VisitTracker } from "@/components/analytics/visit-tracker";
 import { getSiteSettings } from "@/lib/settings";
 
 /**
@@ -19,6 +20,7 @@ export default async function PublicLayout({
       <Header settings={settings} />
       <main className="flex-1">{children}</main>
       <Footer settings={settings} />
+      <VisitTracker />
     </div>
   );
 }

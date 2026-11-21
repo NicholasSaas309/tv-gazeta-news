@@ -7,11 +7,21 @@ export type LiveStatus = {
   /** Está realmente AO VIVO agora (confirmado). Nunca `true` sem confirmação. */
   isLive: boolean;
   title?: string;
+  /** Espectadores simultâneos agora (só confiável via API key; senão null). */
+  viewers: number | null;
+  /** Visualizações totais do vídeo (quando disponível). */
+  totalViews: number | null;
 };
 
 const REVALIDATE_SECONDS = 30;
 const TIMEOUT_MS = 6000;
-const OFFLINE: LiveStatus = { available: false, isLive: false };
+const OFFLINE: LiveStatus = { available: false, isLive: false, viewers: null, totalViews: null };
+
+function toNum(v: unknown): number | null {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
 
 function withTimeout(): { signal: AbortSignal; done: () => void } {
   const c = new AbortController();
@@ -25,16 +35,19 @@ async function viaApi(videoId: string, key: string): Promise<LiveStatus> {
   try {
     const url =
       "https://www.googleapis.com/youtube/v3/videos" +
-      `?part=snippet&id=${encodeURIComponent(videoId)}&key=${encodeURIComponent(key)}`;
+      `?part=snippet,liveStreamingDetails,statistics&id=${encodeURIComponent(videoId)}&key=${encodeURIComponent(key)}`;
     const res = await fetch(url, { signal, next: { revalidate: REVALIDATE_SECONDS } });
     if (!res.ok) return OFFLINE;
     const data = await res.json();
     const item = data?.items?.[0];
     if (!item) return OFFLINE;
+    const isLive = item.snippet?.liveBroadcastContent === "live";
     return {
       available: true,
-      isLive: item.snippet?.liveBroadcastContent === "live",
+      isLive,
       title: item.snippet?.title,
+      viewers: isLive ? toNum(item.liveStreamingDetails?.concurrentViewers) : null,
+      totalViews: toNum(item.statistics?.viewCount),
     };
   } catch {
     return OFFLINE;
@@ -63,11 +76,16 @@ async function viaPage(videoId: string): Promise<LiveStatus> {
     // Estado ao vivo: confirmado só quando isLiveNow === true (nunca falso positivo).
     const isLive = /"isLiveNow":true/.test(html);
     const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
+    // Visualizações totais (disponível na página). Espectadores simultâneos não
+    // são confiáveis sem a API key → null (não inventamos).
+    const viewMatch = html.match(/"viewCount":"(\d+)"/);
 
     return {
       available: true,
       isLive,
       title: titleMatch ? titleMatch[1] : undefined,
+      viewers: null,
+      totalViews: viewMatch ? Number(viewMatch[1]) : null,
     };
   } catch {
     return OFFLINE;
