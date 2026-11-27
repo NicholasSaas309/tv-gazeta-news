@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Section, SectionHeading } from "@/components/public/section";
 import { LivePlayer } from "@/components/player/live-player";
+import { LiveViewers } from "@/components/player/live-viewers";
 import { NewsTicker } from "@/components/public/ticker";
 import { Reveal } from "@/components/public/reveal";
 import { StateNewsTabs } from "@/components/news/state-news-tabs";
@@ -50,13 +51,16 @@ export default async function HomePage() {
           <div className="mt-5 grid gap-8 lg:grid-cols-[1.9fr_1fr]">
             {/* Player */}
             <div className="animate-fade-up">
-              <div className="mb-3 flex items-center gap-3">
-                <span className="text-xs font-bold uppercase tracking-widest text-white/60">
-                  Transmissão ao vivo
-                </span>
-                <Link href="/ao-vivo" className="text-sm text-brand-accent hover:underline">
-                  Abrir página →
-                </Link>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold uppercase tracking-widest text-white/60">
+                    Transmissão ao vivo
+                  </span>
+                  <Link href="/ao-vivo" className="text-sm text-brand-accent hover:underline">
+                    Abrir página →
+                  </Link>
+                </div>
+                <LiveViewers />
               </div>
               <div className="overflow-hidden rounded-xl ring-1 ring-white/10">
                 <LivePlayer source={settings.liveSource} />
