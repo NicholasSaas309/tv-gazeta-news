@@ -76,15 +76,16 @@ async function viaPage(videoId: string): Promise<LiveStatus> {
     // Estado ao vivo: confirmado só quando isLiveNow === true (nunca falso positivo).
     const isLive = /"isLiveNow":true/.test(html);
     const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
-    // Visualizações totais (disponível na página). Espectadores simultâneos não
-    // são confiáveis sem a API key → null (não inventamos).
+    // `originalViewCount` = espectadores assistindo AGORA (quando ao vivo).
+    // `viewCount` = visualizações totais do vídeo.
+    const concurrent = html.match(/"originalViewCount":"(\d+)"/);
     const viewMatch = html.match(/"viewCount":"(\d+)"/);
 
     return {
       available: true,
       isLive,
       title: titleMatch ? titleMatch[1] : undefined,
-      viewers: null,
+      viewers: isLive && concurrent ? Number(concurrent[1]) : null,
       totalViews: viewMatch ? Number(viewMatch[1]) : null,
     };
   } catch {

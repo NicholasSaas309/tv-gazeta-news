@@ -9,7 +9,10 @@ type Status = {
   configured: boolean;
   videoId: string | null;
   isLive: boolean;
+  viewers: number | null;
 };
+
+const nf = new Intl.NumberFormat("pt-BR");
 
 /**
  * Player de transmissão ao vivo (OBS → YouTube → embed).
@@ -28,6 +31,7 @@ export function LivePlayer({ source }: { source: LiveSource }) {
     configured: Boolean(initialId),
     videoId: initialId,
     isLive: false, // nunca assumimos "ao vivo" antes de confirmar
+    viewers: null,
   });
 
   useEffect(() => {
@@ -44,6 +48,7 @@ export function LivePlayer({ source }: { source: LiveSource }) {
           configured: Boolean(data.configured),
           videoId: data.videoId ?? null,
           isLive: Boolean(data.isLive),
+          viewers: typeof data.viewers === "number" ? data.viewers : null,
         });
       } catch {
         if (active) setStatus((s) => ({ ...s, loading: false }));
@@ -76,8 +81,18 @@ export function LivePlayer({ source }: { source: LiveSource }) {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
-            <div className="pointer-events-none absolute left-3 top-3">
+            <div className="pointer-events-none absolute left-3 top-3 flex items-center gap-2">
               <LiveBadge />
+              {status.viewers != null ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/65 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <strong className="tabular-nums">{nf.format(status.viewers)}</strong>
+                  <span className="font-normal text-white/80">assistindo</span>
+                </span>
+              ) : null}
             </div>
           </>
         ) : (

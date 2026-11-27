@@ -27,7 +27,13 @@ export async function GET() {
   const status = await getLiveStatus(videoId);
 
   return NextResponse.json(
-    { configured: true, videoId, isLive: status.isLive, title: status.title ?? null },
+    {
+      configured: true,
+      videoId,
+      isLive: status.isLive,
+      title: status.title ?? null,
+      viewers: status.isLive ? status.viewers : null,
+    },
     { headers: { "Cache-Control": "public, max-age=0, s-maxage=20" } },
   );
 }
