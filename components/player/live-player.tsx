@@ -90,7 +90,7 @@ export function LivePlayer({ source }: { source: LiveSource }) {
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                   <strong className="tabular-nums">{nf.format(status.viewers)}</strong>
-                  <span className="font-normal text-white/80">assistindo</span>
+                  <span className="font-normal text-white/80">assistindo agora</span>
                 </span>
               ) : null}
             </div>

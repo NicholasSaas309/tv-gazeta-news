@@ -2,6 +2,7 @@ import { Container } from "@/components/ui/container";
 import { PageHeader } from "@/components/public/page-header";
 import { ScheduleDay } from "@/components/public/schedule-table";
 import { LivePlayer } from "@/components/player/live-player";
+import { LiveViewers } from "@/components/player/live-viewers";
 import { getSiteSettings } from "@/lib/settings";
 import { todayWeekday } from "@/lib/content/calendar";
 import { getScheduleByDay } from "@/lib/content/sample";
@@ -22,6 +23,7 @@ export default async function AoVivoPage() {
         eyebrow="Transmissão"
         title="Ao Vivo"
         subtitle="Acompanhe a transmissão ao vivo da TV Gazeta News."
+        right={<LiveViewers />}
       />
       <Container className="py-10">
         <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
